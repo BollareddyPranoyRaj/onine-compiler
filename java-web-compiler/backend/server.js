@@ -11,7 +11,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
+// This tells the backend to specifically trust your frontend's address
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174'], // Covers both default Vite ports
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
 app.use(express.json());
 
 // Create a directory for temporary Java files if it doesn't exist

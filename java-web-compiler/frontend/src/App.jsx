@@ -17,7 +17,7 @@ export default function App() {
     setOutput("Compiling and running...");
     try {
       // Note: Make sure your Vite proxy is set to localhost:5000
-      const response = await fetch("http://localhost:5000/api/run", {
+      const response = await fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, stdin })
