@@ -1,35 +1,78 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import CodeEditor from './CodeEditor';
+import Console from './Console';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [code, setCode] = useState(`public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, BPR's Web Compiler!");
+    }
+}`);
+  const [stdin, setStdin] = useState("");
+  const [output, setOutput] = useState("");
+  const [running, setRunning] = useState(false);
+
+  async function runCode() {
+    setRunning(true);
+    setOutput("Compiling and running...");
+    try {
+      // Note: Make sure your Vite proxy is set to localhost:5000
+      const response = await fetch("http://localhost:5000/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, stdin })
+      });
+
+      const json = await response.json();
+      const parts = [];
+      if (json.stdout) parts.push(json.stdout);
+      if (json.stderr) parts.push("ERROR:\n" + json.stderr);
+      
+      setOutput(parts.join("\n") || "No output.");
+    } catch (error) {
+      setOutput(`Error: ${error.message}`);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  // Improved Trim function to replace the broken formatter
+  function trimCode() {
+    const trimmed = code.split('\n').map(line => line.trimEnd()).join('\n').trim();
+    setCode(trimmed);
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="app">
+      <header className="header" style={{ padding: '10px', background: '#222', color: '#fff' }}>
+        <h1>Java Web Compiler</h1>
+        <div className="controls">
+          <button onClick={runCode} disabled={running} style={{ marginRight: '10px' }}>
+            {running ? "Running..." : "Run Code"}
+          </button>
+          <button onClick={trimCode} style={{ marginRight: '10px' }}>Trim Space</button>
+          <button onClick={() => setOutput("")}>Clear Console</button>
+        </div>
+      </header>
 
-export default App
+      <main className="main-content" style={{ display: 'flex', height: '80vh' }}>
+        <section className="editor-area" style={{ flex: 2, borderRight: '1px solid #ccc' }}>
+          <CodeEditor code={code} onChange={setCode} />
+        </section>
+
+        <aside className="side-area" style={{ flex: 1, padding: '10px', display: 'flex', flexDirection: 'column' }}>
+          <div className="stdin-area" style={{ marginBottom: '20px' }}>
+            <label><strong>Input (stdin):</strong></label>
+            <textarea
+              style={{ width: '100%', height: '100px', marginTop: '5px' }}
+              value={stdin}
+              onChange={(e) => setStdin(e.target.value)}
+              placeholder="Enter inputs here..."
+            />
+          </div>
+          <Console output={output} />
+        </aside>
+      </main>
+    </div>
+  );
+}
