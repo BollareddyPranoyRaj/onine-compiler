@@ -18,6 +18,63 @@ const COMPILE_TIMEOUT_MS = 8_000;
 const RUN_TIMEOUT_MS = 5_000;
 const JAVA_HEAP_MB = 128;
 const TEMP_ROOT = path.join(__dirname, 'temp');
+const LANGUAGE_CONFIGS = {
+  java: {
+    fileName: 'Main.java',
+    compile: {
+      command: 'javac',
+      args: () => [`-J-Xmx${JAVA_HEAP_MB}m`, 'Main.java'],
+      timeoutMs: COMPILE_TIMEOUT_MS
+    },
+    run: {
+      command: 'java',
+      args: (folderPath) => [`-Xmx${JAVA_HEAP_MB}m`, '-cp', folderPath, 'Main'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  python: {
+    fileName: 'main.py',
+    run: {
+      command: 'python3',
+      args: () => ['main.py'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  c: {
+    fileName: 'main.c',
+    compile: {
+      command: 'gcc',
+      args: () => ['main.c', '-O2', '-o', 'main'],
+      timeoutMs: COMPILE_TIMEOUT_MS
+    },
+    run: {
+      command: './main',
+      args: () => [],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  cpp: {
+    fileName: 'main.cpp',
+    compile: {
+      command: 'g++',
+      args: () => ['main.cpp', '-O2', '-std=c++17', '-o', 'main'],
+      timeoutMs: COMPILE_TIMEOUT_MS
+    },
+    run: {
+      command: './main',
+      args: () => [],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  javascript: {
+    fileName: 'main.js',
+    run: {
+      command: 'node',
+      args: () => ['main.js'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  }
+};
 
 const app = express();
 app.use(cors());
@@ -160,9 +217,19 @@ function runCommand(command, args, options = {}) {
 app.post('/api/run', async (req, res) => {
   const code = typeof req.body?.code === 'string' ? req.body.code : '';
   const stdin = typeof req.body?.stdin === 'string' ? req.body.stdin : '';
+  const language = typeof req.body?.language === 'string' ? req.body.language : 'java';
+  const languageConfig = LANGUAGE_CONFIGS[language];
 
   if (!code.trim()) {
     return res.status(400).json({ stdout: '', stderr: 'No code provided', exitCode: 1 });
+  }
+
+  if (!languageConfig) {
+    return res.status(400).json({
+      stdout: '',
+      stderr: `Unsupported language: ${language}`,
+      exitCode: 1
+    });
   }
 
   if (Buffer.byteLength(code, 'utf8') > MAX_CODE_SIZE) {
@@ -186,34 +253,36 @@ app.post('/api/run', async (req, res) => {
 
   try {
     fs.mkdirSync(folderPath, { recursive: true, mode: 0o700 });
-    const filePath = path.join(folderPath, 'Main.java');
+    const filePath = path.join(folderPath, languageConfig.fileName);
     fs.writeFileSync(filePath, code, { encoding: 'utf8', mode: 0o600 });
 
-    const compileResult = await runCommand(
-      'javac',
-      [`-J-Xmx${JAVA_HEAP_MB}m`, 'Main.java'],
-      {
-        cwd: folderPath,
-        timeoutMs: COMPILE_TIMEOUT_MS
-      }
-    );
+    if (languageConfig.compile) {
+      const compileResult = await runCommand(
+        languageConfig.compile.command,
+        languageConfig.compile.args(folderPath),
+        {
+          cwd: folderPath,
+          timeoutMs: languageConfig.compile.timeoutMs
+        }
+      );
 
-    if (!compileResult.ok) {
-      cleanupDir(folderPath);
-      return res.json({
-        stdout: compileResult.stdout,
-        stderr: compileResult.stderr,
-        exitCode: compileResult.exitCode
-      });
+      if (!compileResult.ok) {
+        cleanupDir(folderPath);
+        return res.json({
+          stdout: compileResult.stdout,
+          stderr: compileResult.stderr,
+          exitCode: compileResult.exitCode
+        });
+      }
     }
 
     const runResult = await runCommand(
-      'java',
-      [`-Xmx${JAVA_HEAP_MB}m`, '-cp', folderPath, 'Main'],
+      languageConfig.run.command,
+      languageConfig.run.args(folderPath),
       {
         cwd: folderPath,
         stdin,
-        timeoutMs: RUN_TIMEOUT_MS
+        timeoutMs: languageConfig.run.timeoutMs
       }
     );
 

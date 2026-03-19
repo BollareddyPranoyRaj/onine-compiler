@@ -57,13 +57,8 @@ export default function App() {
   const [running, setRunning] = useState(false);
 
   async function runCode() {
-    if (selectedLanguage !== 'java') {
-      setOutput(`${getLanguageConfig(selectedLanguage).label} execution is coming soon. The backend currently runs Java only.`);
-      return;
-    }
-
     setRunning(true);
-    setOutput("Compiling and running...");
+    setOutput(`Compiling and running ${getLanguageConfig(selectedLanguage).label}...`);
     try {
       const response = await fetch("/api/run", {
         method: "POST",
@@ -105,7 +100,7 @@ export default function App() {
     const nextConfig = getLanguageConfig(nextLanguage);
     setSelectedLanguage(nextLanguage);
     setCode(nextConfig.starterCode);
-    setOutput(`${nextConfig.label} selected.${nextLanguage === 'java' ? ' Ready to run.' : ' UI is ready; backend support is coming soon.'}`);
+    setOutput(`${nextConfig.label} selected. Ready to run.`);
   }
 
   // Improved Trim function to replace the broken formatter
