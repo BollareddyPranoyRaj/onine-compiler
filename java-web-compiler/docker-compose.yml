@@ -9,5 +9,5 @@ services:
       HOST: 0.0.0.0
       PORT: 5000
     tmpfs:
-      - /app/backend/temp:size=64m
+      - /app/backend/temp:size=64m,uid=1000,gid=1000,mode=1777
     restart: unless-stopped
