@@ -9,7 +9,7 @@ const LANGUAGE_OPTIONS = [
     editorLanguage: 'java',
     starterCode: `public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, BPR's Web Compiler!");
+        System.out.println("Hello from BPR CodeLab!");
     }
 }`
   },
@@ -113,7 +113,7 @@ export default function App() {
     <div className="app">
       <header className="header app-header">
         <div className="header-title-group">
-          <h1>{getLanguageConfig(selectedLanguage).label} Web Compiler</h1>
+          <h1>BPR CodeLab</h1>
           <div className="language-picker">
             <label htmlFor="language-select">Language</label>
             <select
