@@ -1,5 +1,5 @@
 {
-  "name": "java-web-compiler",
+  "name": "aio-compiler",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",

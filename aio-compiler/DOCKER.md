@@ -21,7 +21,7 @@ docker compose version
 From the project root:
 
 ```bash
-cd /Users/bollareddypranoyraj/java-compiler-2/java-web-compiler
+cd /Users/bollareddypranoyraj/java-compiler-2/aio-compiler
 docker compose up --build backend
 ```
 
@@ -48,7 +48,7 @@ http://localhost:5001
 In another terminal:
 
 ```bash
-cd /Users/bollareddypranoyraj/java-compiler-2/java-web-compiler/frontend
+cd /Users/bollareddypranoyraj/java-compiler-2/aio-compiler/frontend
 npm run dev
 ```
 
