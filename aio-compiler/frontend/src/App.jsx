@@ -103,12 +103,6 @@ export default function App() {
     setOutput(`${nextConfig.label} selected. Ready to run.`);
   }
 
-  // Improved Trim function to replace the broken formatter
-  function trimCode() {
-    const trimmed = code.split('\n').map(line => line.trimEnd()).join('\n').trim();
-    setCode(trimmed);
-  }
-
   return (
     <div className="app">
       <header className="header app-header">
@@ -133,7 +127,6 @@ export default function App() {
           <button onClick={runCode} disabled={running} style={{ marginRight: '10px' }}>
             {running ? "Running..." : "Run Code"}
           </button>
-          <button onClick={trimCode} style={{ marginRight: '10px' }}>Trim Space</button>
           <button onClick={() => setOutput("")}>Clear Console</button>
         </div>
       </header>
