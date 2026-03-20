@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile.backend
     ports:
       - "5001:5000"
+    env_file:
+      - .env
     environment:
       HOST: 0.0.0.0
       PORT: 5000

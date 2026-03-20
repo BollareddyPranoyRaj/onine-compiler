@@ -51,10 +51,12 @@ int main() {
 
 export default function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('java');
+  const [aiAction, setAiAction] = useState('fix');
   const [code, setCode] = useState(LANGUAGE_OPTIONS[0].starterCode);
   const [stdin, setStdin] = useState("");
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
   async function runCode() {
     setRunning(true);
@@ -103,6 +105,40 @@ export default function App() {
     setOutput(`${nextConfig.label} selected. Ready to run.`);
   }
 
+  async function handleAiAction() {
+    setAiLoading(true);
+    setOutput(`AI is ${aiAction === 'fix' ? 'fixing' : aiAction === 'explain' ? 'explaining' : 'optimizing'} your ${getLanguageConfig(selectedLanguage).label} code...`);
+
+    try {
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: aiAction,
+          code,
+          language: selectedLanguage
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'AI request failed.');
+      }
+
+      if (result.didChangeCode && typeof result.updatedCode === 'string') {
+        setCode(result.updatedCode);
+      }
+
+      setOutput(result.message || 'AI response received.');
+    } catch (error) {
+      console.error('AI error:', error);
+      setOutput(`AI Error: ${error.message}`);
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   return (
     <div className="app">
       <header className="header app-header">
@@ -122,10 +158,25 @@ export default function App() {
               ))}
             </select>
           </div>
+          <div className="language-picker">
+            <label htmlFor="ai-action-select">AI Mode</label>
+            <select
+              id="ai-action-select"
+              value={aiAction}
+              onChange={(event) => setAiAction(event.target.value)}
+            >
+              <option value="fix">Fix Code</option>
+              <option value="explain">Explain Code</option>
+              <option value="optimize">Optimize Code</option>
+            </select>
+          </div>
         </div>
         <div className="controls">
           <button onClick={runCode} disabled={running} style={{ marginRight: '10px' }}>
             {running ? "Running..." : "Run Code"}
+          </button>
+          <button onClick={handleAiAction} disabled={aiLoading} style={{ marginRight: '10px' }}>
+            {aiLoading ? 'AI Working...' : 'Ask AI'}
           </button>
           <button onClick={() => setOutput("")}>Clear Console</button>
         </div>
