@@ -2,6 +2,8 @@ import { useState } from 'react';
 import CodeEditor from './CodeEditor';
 import Console from './Console';
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+
 const LANGUAGE_OPTIONS = [
   {
     id: 'java',
@@ -58,11 +60,15 @@ export default function App() {
   const [running, setRunning] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
 
+  function buildApiUrl(path) {
+    return API_BASE_URL ? `${API_BASE_URL}${path}` : path;
+  }
+
   async function runCode() {
     setRunning(true);
     setOutput(`Compiling and running ${getLanguageConfig(selectedLanguage).label}...`);
     try {
-      const response = await fetch("/api/run", {
+      const response = await fetch(buildApiUrl("/api/run"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, stdin, language: selectedLanguage })
@@ -110,7 +116,7 @@ export default function App() {
     setOutput(`AI is ${aiAction === 'fix' ? 'fixing' : aiAction === 'explain' ? 'explaining' : 'optimizing'} your ${getLanguageConfig(selectedLanguage).label} code...`);
 
     try {
-      const response = await fetch('/api/ai', {
+      const response = await fetch(buildApiUrl('/api/ai'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
