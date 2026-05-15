@@ -21,6 +21,10 @@ const RUN_TIMEOUT_MS = 5_000;
 const JAVA_HEAP_MB = 128;
 const TEMP_ROOT = path.join(__dirname, 'temp');
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
+const CORS_ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 const LANGUAGE_CONFIGS = {
   java: {
     fileName: 'Main.java',
@@ -80,7 +84,16 @@ const LANGUAGE_CONFIGS = {
 };
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || CORS_ALLOWED_ORIGINS.length === 0 || CORS_ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`Origin ${origin} is not allowed by CORS`));
+  }
+}));
 app.use(express.json({ limit: '100kb' }));
 
 fs.mkdirSync(TEMP_ROOT, { recursive: true });
@@ -420,6 +433,10 @@ app.post('/api/run', async (req, res) => {
       exitCode: 1
     });
   }
+});
+
+app.get('/health', (req, res) => {
+  res.json({ ok: true });
 });
 
 app.get('/', (req, res) => {
