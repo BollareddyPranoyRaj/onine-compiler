@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: bpr-codelab-backend
+    runtime: docker
+    repo: https://github.com/BollareddyPranoyRaj/onine-compiler.git
+    branch: main
+    rootDir: aio-compiler
+    dockerfilePath: ./aio-compiler/Dockerfile.backend
+    dockerContext: ./aio-compiler
+    healthCheckPath: /health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 5000
+      - key: OPENAI_MODEL
+        value: gpt-5-mini
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
