@@ -92,8 +92,16 @@ app.use(cors({
       return;
     }
     callback(new Error(`Origin ${origin} is not allowed by CORS`));
-  }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 }));
+
+// Explicitly handle preflight OPTIONS requests
+app.options('*', (req, res) => {
+  res.sendStatus(200);
+});
 app.use(express.json({ limit: '100kb' }));
 
 fs.mkdirSync(TEMP_ROOT, { recursive: true });
