@@ -98,8 +98,8 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
-// Explicitly handle preflight OPTIONS requests
-app.options('*', (req, res) => {
+// Explicitly handle preflight OPTIONS requests (Express 5 compatible)
+app.options(/.*/, (req, res) => {
   res.sendStatus(200);
 });
 app.use(express.json({ limit: '100kb' }));
