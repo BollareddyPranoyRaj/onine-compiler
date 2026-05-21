@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { spawn } from 'child_process';
 import fs from 'fs';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,11 +20,12 @@ const COMPILE_TIMEOUT_MS = 8_000;
 const RUN_TIMEOUT_MS = 5_000;
 const JAVA_HEAP_MB = 128;
 const TEMP_ROOT = path.join(__dirname, 'temp');
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 const CORS_ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+
 const LANGUAGE_CONFIGS = {
   java: {
     fileName: 'Main.java',
@@ -90,7 +91,6 @@ app.use(cors({
       callback(null, true);
       return;
     }
-
     callback(new Error(`Origin ${origin} is not allowed by CORS`));
   }
 }));
@@ -98,12 +98,11 @@ app.use(express.json({ limit: '100kb' }));
 
 fs.mkdirSync(TEMP_ROOT, { recursive: true });
 
-function getOpenAIClient() {
-  if (!process.env.OPENAI_API_KEY) {
+function getGeminiClient() {
+  if (!process.env.GEMINI_API_KEY) {
     return null;
   }
-
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 }
 
 function getAiActionPrompt(action, language) {
@@ -251,14 +250,14 @@ function runCommand(command, args, options = {}) {
 }
 
 app.post('/api/ai', async (req, res) => {
-  const client = getOpenAIClient();
+  const genAI = getGeminiClient();
   const code = typeof req.body?.code === 'string' ? req.body.code : '';
   const language = typeof req.body?.language === 'string' ? req.body.language : 'java';
   const action = typeof req.body?.action === 'string' ? req.body.action : 'fix';
 
-  if (!client) {
+  if (!genAI) {
     return res.status(503).json({
-      message: 'OPENAI_API_KEY is not configured on the backend.',
+      message: 'GEMINI_API_KEY is not configured on the backend.',
       updatedCode: code,
       didChangeCode: false
     });
@@ -281,56 +280,37 @@ app.post('/api/ai', async (req, res) => {
   }
 
   try {
-    const response = await client.responses.create({
-      model: OPENAI_MODEL,
-      input: [
-        {
-          role: 'system',
-          content: [
-            {
-              type: 'input_text',
-              text: getAiActionPrompt(action, language)
-            }
-          ]
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'input_text',
-              text: [
-                `Action: ${action}`,
-                `Language: ${language}`,
-                'Return a short helpful message and the best code to show in the editor.',
-                'If the action is explain, keep updatedCode identical to the original unless a tiny correction is necessary.',
-                '',
-                'Code:',
-                code
-              ].join('\n')
-            }
-          ]
-        }
-      ],
-      text: {
-        format: {
-          type: 'json_schema',
-          name: 'ai_code_assistant_response',
-          strict: true,
-          schema: {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              message: { type: 'string' },
-              updatedCode: { type: 'string' },
-              didChangeCode: { type: 'boolean' }
-            },
-            required: ['message', 'updatedCode', 'didChangeCode']
-          }
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_MODEL,
+      systemInstruction: getAiActionPrompt(action, language),
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'object',
+          properties: {
+            message: { type: 'string' },
+            updatedCode: { type: 'string' },
+            didChangeCode: { type: 'boolean' }
+          },
+          required: ['message', 'updatedCode', 'didChangeCode']
         }
       }
     });
 
-    const payload = JSON.parse(response.output_text || '{}');
+    const prompt = [
+      `Action: ${action}`,
+      `Language: ${language}`,
+      'Return a short helpful message and the best code to show in the editor.',
+      'If the action is explain, keep updatedCode identical to the original unless a tiny correction is necessary.',
+      '',
+      'Code:',
+      code
+    ].join('\n');
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const payload = JSON.parse(text || '{}');
+
     return res.json({
       message: payload.message || 'AI response received.',
       updatedCode: typeof payload.updatedCode === 'string' ? payload.updatedCode : code,
