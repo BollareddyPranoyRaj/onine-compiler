@@ -26,21 +26,28 @@ const CORS_ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || '')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+// Extracts the public class name from Java source code
+function getJavaClassName(code) {
+  const match = code.match(/public\s+class\s+(\w+)/);
+  return match ? match[1] : 'Main';
+}
+
 const LANGUAGE_CONFIGS = {
   java: {
-    fileName: 'Main.java',
+    getFileName: (code) => `${getJavaClassName(code)}.java`,
     compile: {
       command: 'javac',
-      args: () => [`-J-Xmx${JAVA_HEAP_MB}m`, 'Main.java'],
+      args: (folderPath, code) => [`-J-Xmx${JAVA_HEAP_MB}m`, `${getJavaClassName(code)}.java`],
       timeoutMs: COMPILE_TIMEOUT_MS
     },
     run: {
       command: 'java',
-      args: (folderPath) => [`-Xmx${JAVA_HEAP_MB}m`, '-cp', folderPath, 'Main'],
+      args: (folderPath, code) => [`-Xmx${JAVA_HEAP_MB}m`, '-cp', folderPath, getJavaClassName(code)],
       timeoutMs: RUN_TIMEOUT_MS
     }
   },
   python: {
+    getFileName: () => 'main.py',
     fileName: 'main.py',
     run: {
       command: 'python3',
@@ -382,13 +389,19 @@ app.post('/api/run', async (req, res) => {
 
   try {
     fs.mkdirSync(folderPath, { recursive: true, mode: 0o700 });
-    const filePath = path.join(folderPath, languageConfig.fileName);
+
+    // For Java: dynamically detect class name so any class name works
+    const fileName = languageConfig.getFileName
+      ? languageConfig.getFileName(code)
+      : languageConfig.fileName;
+
+    const filePath = path.join(folderPath, fileName);
     fs.writeFileSync(filePath, code, { encoding: 'utf8', mode: 0o600 });
 
     if (languageConfig.compile) {
       const compileResult = await runCommand(
         languageConfig.compile.command,
-        languageConfig.compile.args(folderPath),
+        languageConfig.compile.args(folderPath, code),
         {
           cwd: folderPath,
           timeoutMs: languageConfig.compile.timeoutMs
@@ -407,7 +420,7 @@ app.post('/api/run', async (req, res) => {
 
     const runResult = await runCommand(
       languageConfig.run.command,
-      languageConfig.run.args(folderPath),
+      languageConfig.run.args(folderPath, code),
       {
         cwd: folderPath,
         stdin,
