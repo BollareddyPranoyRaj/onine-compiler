@@ -9,8 +9,153 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <style>
+      /* ── LOADING SCREEN (inline so it shows before CSS bundle loads) ── */
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #080b12;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        transition: opacity 0.55s ease, visibility 0.55s ease;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      #loading-screen.fade-out {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .ls-icon {
+        font-size: 3.5rem;
+        animation: ls-pulse 1.2s ease-in-out infinite;
+        margin-bottom: 18px;
+        filter: drop-shadow(0 0 18px #6366f1);
+      }
+
+      @keyframes ls-pulse {
+        0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 14px #6366f1); }
+        50%       { transform: scale(1.12); filter: drop-shadow(0 0 28px #8b5cf6); }
+      }
+
+      .ls-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+      }
+
+      .ls-message {
+        font-size: 0.88rem;
+        color: #7c8fa6;
+        margin-bottom: 36px;
+        font-weight: 500;
+        text-align: center;
+        padding: 0 24px;
+        min-height: 1.4em;
+        animation: ls-fadein 0.4s ease;
+      }
+
+      @keyframes ls-fadein {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .ls-bar-track {
+        width: 200px;
+        height: 3px;
+        background: #1e2d40;
+        border-radius: 99px;
+        overflow: hidden;
+      }
+
+      .ls-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        border-radius: 99px;
+        animation: ls-fill 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        box-shadow: 0 0 10px #8b5cf6;
+      }
+
+      @keyframes ls-fill {
+        0%   { width: 0%; }
+        60%  { width: 75%; }
+        85%  { width: 90%; }
+        100% { width: 100%; }
+      }
+
+      .ls-dots {
+        display: flex;
+        gap: 6px;
+        margin-top: 28px;
+      }
+
+      .ls-dots span {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #6366f1;
+        animation: ls-bounce 1.2s ease-in-out infinite;
+      }
+
+      .ls-dots span:nth-child(2) { animation-delay: 0.2s; background: #8b5cf6; }
+      .ls-dots span:nth-child(3) { animation-delay: 0.4s; background: #a78bfa; }
+
+      @keyframes ls-bounce {
+        0%, 100% { transform: translateY(0);    opacity: 0.4; }
+        50%       { transform: translateY(-6px); opacity: 1; }
+      }
+    </style>
+
+    <script>
+      // Pick a random funny message before page loads
+      const messages = [
+        'Bribing the compiler... 🤝',
+        'Teaching AI not to break things... 🤖',
+        'sudo apt-get install genius... 🧠',
+        'Warming up the JVM... ☕',
+        'Turning caffeine into code... ⚡',
+        'git commit -m "it works, don\'t touch it"... 🙏',
+        'Debugging before you write bugs... 🐛',
+        'Asking nicely for semicolons... ;',
+        'Loading your superpower... 🦸',
+        'printf("Hello, World!") intensifies... 📢',
+        'Compiling compliments for your code... 💬',
+        'Negotiating with null pointers... 🤞',
+      ];
+      window.__loadingMsg = messages[Math.floor(Math.random() * messages.length)];
+    </script>
   </head>
   <body>
+
+    <!-- Loading Screen (visible before React mounts) -->
+    <div id="loading-screen">
+      <div class="ls-icon">⚡</div>
+      <div class="ls-title">BPR CodeLab</div>
+      <div class="ls-message" id="ls-message">Loading...</div>
+      <div class="ls-bar-track">
+        <div class="ls-bar-fill"></div>
+      </div>
+      <div class="ls-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <script>
+      // Set the random message text
+      document.getElementById('ls-message').textContent = window.__loadingMsg;
+    </script>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
