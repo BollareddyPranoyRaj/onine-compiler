@@ -87,11 +87,20 @@ const LANGUAGE_CONFIGS = {
 const app = express();
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || CORS_ALLOWED_ORIGINS.length === 0 || CORS_ALLOWED_ORIGINS.includes(origin)) {
-      callback(null, true);
-      return;
-    }
-    callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    // Allow requests with no origin (e.g. curl, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+
+    // Allow if no restrictions set
+    if (CORS_ALLOWED_ORIGINS.length === 0) return callback(null, true);
+
+    // Allow exact match from env variable
+    if (CORS_ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+
+    // Allow any Vercel preview deployment for this project
+    if (/^https:\/\/onine-compiler.*\.vercel\.app$/.test(origin)) return callback(null, true);
+
+    // Reject — return null, false (not an Error) to avoid 500
+    return callback(null, false);
   },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
