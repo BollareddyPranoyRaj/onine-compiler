@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CodeEditor from './CodeEditor';
 import Console from './Console';
 
@@ -50,6 +50,22 @@ export default function App() {
   const [output, setOutput] = useState('');
   const [running, setRunning] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+
+  useEffect(() => {
+    const loadingScreen = document.getElementById('loading-screen');
+
+    if (!loadingScreen) {
+      return undefined;
+    }
+
+    loadingScreen.classList.add('fade-out');
+
+    const removeTimer = window.setTimeout(() => {
+      loadingScreen.remove();
+    }, 600);
+
+    return () => window.clearTimeout(removeTimer);
+  }, []);
 
   function buildApiUrl(path) {
     return API_BASE_URL ? `${API_BASE_URL}${path}` : path;
