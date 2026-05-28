@@ -52,7 +52,7 @@ jobs:
         run: echo "Testing ${{ matrix.language }}"   
 
       - name: Build Docker image for ${{ matrix.language }}
-        run: docker build -f Dockerfile.backend -t bollareddypranoyraj/aio-compiler:latest .
+        run: docker build -f Dockerfile.backend -t bollareddypranoyraj/aio-compiler:${{ github.sha }} .
 
       - name: Push Docker image
-        run: docker push bollareddypranoyraj/aio-compiler:latest 
+        run: docker push bollareddypranoyraj/aio-compiler:${{ github.sha }}
