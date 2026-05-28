@@ -13,3 +13,8 @@ services:
     tmpfs:
       - /app/backend/temp:size=64m,uid=1000,gid=1000,mode=1777,exec
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1G"
