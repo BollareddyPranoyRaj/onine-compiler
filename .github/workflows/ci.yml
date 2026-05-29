@@ -16,7 +16,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: frontend
+        working-directory: aio-compiler/frontend
 
     steps:
       - uses: actions/checkout@v4
