@@ -53,9 +53,10 @@ jobs:
 
       - name: Build Docker image for ${{ matrix.language }}
         run: |
-          docker build -f Dockerfile.backend \
+          docker build -f aio-compiler/Dockerfile.backend \
           -t bollareddypranoyraj/aio-compiler:latest \
-          -t bollareddypranoyraj/aio-compiler:${{ github.sha }} .
+          -t bollareddypranoyraj/aio-compiler:${{ github.sha }} \
+          aio-compiler
           
       - name: Run container test
         run: |
