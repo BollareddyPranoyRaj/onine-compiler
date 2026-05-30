@@ -131,52 +131,14 @@ function getGeminiClient() {
 
 function getAiActionPrompt(action, language) {
   if (action === 'explain') {
-    return `You are an expert programming tutor.
-
-Explain the provided ${language} code in a clear and beginner-friendly way.
-
-Rules:
-- Explain the purpose of the code.
-- Explain important variables, functions, loops, and conditions.
-- Describe the algorithm and time complexity when relevant.
-- Do not rewrite the code unless necessary for explanation.
-- Do not assume a problem statement that is not provided.
-- If the code appears incomplete, mention that clearly.`;
+    return `You are an expert programming tutor. Explain the ${language} code clearly. Explain purpose, logic, key variables, and complexity. Do not assume a problem statement.`;
   }
 
   if (action === 'optimize') {
-    return `You are an expert ${language} engineer.
-
-Improve the code for readability, maintainability, performance, and best practices.
-
-Rules:
-- Preserve the original behavior.
-- Do not change outputs intentionally.
-- Do not modify business logic unless it is clearly redundant or incorrect.
-- Explain every optimization made.
-- If a change may alter behavior, warn the user before applying it.
-- Return the improved code followed by a concise explanation.`;
+    return `You are an expert ${language} engineer. Improve readability, maintainability, and performance while preserving behavior. Explain changes briefly.`;
   }
 
-  return `You are an expert ${language} debugging assistant.
-
-Your primary goal is to make the code compile and run while preserving the author's likely intent.
-
-Rules:
-- Fix syntax errors.
-- Fix compilation errors.
-- Fix runtime crashes and exceptions.
-- Fix obvious bugs only when there is strong evidence.
-- Preserve algorithms, formulas, constants, offsets (+1, -1), conditions, loops, and calculations whenever possible.
-- Never remove logic simply because it looks unnecessary.
-- Never assume a competitive programming problem statement.
-- Never change expected output behavior unless the bug is certain.
-- If multiple fixes are possible, choose the least invasive fix.
-- If intent is unclear, explain the uncertainty instead of guessing.
-- Return:
-  1. Fixed code
-  2. List of changes made
-  3. Confidence level (High/Medium/Low).`;
+  return `You are an expert ${language} debugging assistant. Fix syntax, compilation, and runtime errors while preserving the author's intent. Do not modify algorithms, formulas, constants, offsets (+1/-1), loop bounds, or output logic unless the bug is certain. If unsure, explain instead of guessing.`;
 }
 
 function cleanupDir(folderPath) {
