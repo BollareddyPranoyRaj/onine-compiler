@@ -157,12 +157,14 @@ export default function App() {
       <header className="header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
 
-          {/* Logo */}
+           {/* Logo */}
           <div className="logo">
-            <span className="logo-icon">⚡</span>
-            <h1 className="logo-text">BPR CodeLab</h1>
+            <img
+              src="/1.svg"
+              alt="BPR CodeLab"
+              className="logo-image"
+            />
           </div>
-
           {/* Selectors */}
           <div className="header-selectors">
             <div className="selector-group">
