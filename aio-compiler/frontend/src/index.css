@@ -91,6 +91,11 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.logo-image {
+  height: 38px;
+  width: auto;
+  display: block;
+}
 
 /* Selectors */
 .header-selectors {
