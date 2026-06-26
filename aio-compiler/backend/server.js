@@ -103,8 +103,9 @@ app.use(cors({
     // Allow exact match from env variable
     if (CORS_ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
 
-    // Allow any Vercel preview deployment for this project
-    if (/^https:\/\/onine-compiler.*\.vercel\.app$/.test(origin)) return callback(null, true);
+    // Allow any Vercel deployment (*.vercel.app) and allow bprcodelab.dev domains
+    if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return callback(null, true);
+    if (origin === 'https://bprcodelab.dev' || origin === 'https://www.bprcodelab.dev') return callback(null, true);
 
     // Reject — return null, false (not an Error) to avoid 500
     return callback(null, false);

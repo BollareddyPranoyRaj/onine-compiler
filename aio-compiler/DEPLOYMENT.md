@@ -2,7 +2,7 @@
 
 This project is set up for:
 
-- `Vercel` for the frontend
+- `Vercel (https://bprcodelab.dev)` for the frontend
 - `Render` for the backend
 
 ## Frontend on Vercel
@@ -42,12 +42,12 @@ Set these environment variables in Render:
 ```bash
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_MODEL=gpt-5-mini
-CORS_ALLOWED_ORIGINS=https://your-vercel-app.vercel.app
+CORS_ALLOWED_ORIGINS=https://bprcodelab.dev,https://www.bprcodelab.dev
 HOST=0.0.0.0
 PORT=5000
 ```
 
-If you add a custom frontend domain later, include it in `CORS_ALLOWED_ORIGINS` as a comma-separated list.
+CORS_ALLOWED_ORIGINS already includes the production custom domains. Add any additional frontend domains as a comma-separated list if needed.
 
 ## Notes
 
