@@ -1,4 +1,3 @@
-```markdown
 # 🚀 BPR CodeLab
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-bprcodelab.dev-blue?style=for-the-badge)](https://bprcodelab.dev/)
@@ -133,7 +132,5 @@ Experience the compiler live at: **[https://bprcodelab.dev/](https://bprcodelab.
 ## 👨‍💻 Author
 
 Built by **Bollareddy Pranoy Raj**
-
-```
 
 ```
