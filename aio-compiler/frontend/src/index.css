@@ -211,6 +211,17 @@ body {
   transform: translateY(-1px);
 }
 
+.btn-reset {
+  background: #243044;
+  color: var(--text-primary);
+  border: 1px solid var(--border-bright);
+}
+.btn-reset:hover:not(:disabled) {
+  background: #2d3b52;
+  border-color: var(--text-secondary);
+  transform: translateY(-1px);
+}
+
 .btn-clear {
   background: var(--bg-elevated);
   color: var(--text-secondary);
