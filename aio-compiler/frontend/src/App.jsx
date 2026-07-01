@@ -190,6 +190,13 @@ export default function App() {
     setOutput(`${nextConfig.label} selected. Ready to run.`);
   }
 
+  function resetCode() {
+    const currentConfig = getLanguageConfig(selectedLanguage);
+    setCode(currentConfig.starterCode);
+    setConsoleCleared(false);
+    setOutput(`${currentConfig.label} starter code restored.`);
+  }
+
   async function handleAiAction() {
     setAiLoading(true);
     setConsoleCleared(false);
@@ -295,6 +302,14 @@ export default function App() {
             disabled={aiLoading || formatting}
           >
             {aiLoading ? <><span className="spinner"></span> AI Working...</> : '✦ Ask AI'}
+          </button>
+          <button
+            id="reset-code-btn"
+            className="btn btn-reset"
+            onClick={resetCode}
+            disabled={running || formatting || aiLoading}
+          >
+            ↺ Reset
           </button>
           <button
             id="clear-console-btn"
