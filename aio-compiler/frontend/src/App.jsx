@@ -10,35 +10,72 @@ const LANGUAGE_OPTIONS = [
     label: 'Java',
     icon: '☕',
     editorLanguage: 'java',
-    starterCode: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from BPR CodeLab!");\n    }\n}`
+    starterCode: `import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Your code here
+
+        sc.close();
+    }
+}`
   },
   {
     id: 'python',
     label: 'Python',
     icon: '🐍',
     editorLanguage: 'python',
-    starterCode: `print("Hello from Python!")`
+    starterCode: `def main():
+    # Your code here
+    pass
+
+
+if __name__ == "__main__":
+    main()`
   },
   {
     id: 'c',
     label: 'C',
     icon: '🔧',
     editorLanguage: 'c',
-    starterCode: `#include <stdio.h>\n\nint main(void) {\n    printf("Hello from C!\\n");\n    return 0;\n}`
+    starterCode: `#include <stdio.h>
+
+int main() {
+
+    // Your code here
+
+    return 0;
+}`
   },
   {
     id: 'cpp',
     label: 'C++',
     icon: '⚡',
     editorLanguage: 'cpp',
-    starterCode: `#include <iostream>\n\nint main() {\n    std::cout << "Hello from C++!" << std::endl;\n    return 0;\n}`
+    starterCode: `#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // Your code here
+
+    return 0;
+}`
   },
   {
     id: 'javascript',
     label: 'JavaScript',
     icon: '🟡',
     editorLanguage: 'javascript',
-    starterCode: `console.log("Hello from JavaScript!");`
+    starterCode: `'use strict';
+
+// Your code here
+
+console.log("Hello, BPR CodeLab!");`
   }
 ];
 
