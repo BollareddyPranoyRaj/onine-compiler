@@ -50,6 +50,7 @@ export default function App() {
   const [output, setOutput] = useState('');
   const [running, setRunning] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [formatting, setFormatting] = useState(false);
 
   useEffect(() => {
     const loadingScreen = document.getElementById('loading-screen');
@@ -103,6 +104,36 @@ export default function App() {
       setOutput(`Error: ${error.message}`);
     } finally {
       setRunning(false);
+    }
+  }
+
+  async function formatCode() {
+    setFormatting(true);
+    setOutput(`Formatting ${getLanguageConfig(selectedLanguage).label} code...`);
+
+    try {
+      const response = await fetch(buildApiUrl('/api/format'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, language: selectedLanguage })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Formatting failed.');
+      }
+
+      if (typeof result.formattedCode === 'string') {
+        setCode(result.formattedCode);
+      }
+
+      setOutput(result.message || 'Code formatted successfully.');
+    } catch (error) {
+      console.error('Format error:', error);
+      setOutput(`Format Error: ${error.message}`);
+    } finally {
+      setFormatting(false);
     }
   }
 
@@ -203,15 +234,23 @@ export default function App() {
             id="run-code-btn"
             className="btn btn-run"
             onClick={runCode}
-            disabled={running}
+            disabled={running || formatting}
           >
             {running ? <><span className="spinner"></span> Running...</> : '▶ Run Code'}
+          </button>
+          <button
+            id="format-code-btn"
+            className="btn btn-format"
+            onClick={formatCode}
+            disabled={formatting || running}
+          >
+            {formatting ? <><span className="spinner"></span> Formatting...</> : '⌘ Format'}
           </button>
           <button
             id="ask-ai-btn"
             className="btn btn-ai"
             onClick={handleAiAction}
-            disabled={aiLoading}
+            disabled={aiLoading || formatting}
           >
             {aiLoading ? <><span className="spinner"></span> AI Working...</> : '✦ Ask AI'}
           </button>
@@ -264,7 +303,12 @@ export default function App() {
 
           {/* Console */}
           <div className="console-panel">
-            <Console output={output} running={running} aiLoading={aiLoading} />
+            <Console
+              output={output}
+              running={running}
+              aiLoading={aiLoading}
+              formatting={formatting}
+            />
           </div>
 
         </aside>
