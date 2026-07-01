@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 
-export default function Console({ output, running, aiLoading, formatting }) {
+export default function Console({ output, running, aiLoading, formatting, cleared }) {
   const isEmpty   = !output;
   const isLoading = running || aiLoading || formatting;
   const isError   = !isLoading && output && (
@@ -38,7 +38,7 @@ export default function Console({ output, running, aiLoading, formatting }) {
         </span>
       </div>
       <pre className={outputClass}>
-        {output || 'Run code or Ask AI to see output here...'}
+        {cleared ? '' : output || 'Run code, Format, or Ask AI to see output here...'}
       </pre>
     </div>
   );
@@ -49,4 +49,5 @@ Console.propTypes = {
   running:    PropTypes.bool,
   aiLoading:  PropTypes.bool,
   formatting: PropTypes.bool,
+  cleared:    PropTypes.bool,
 };
