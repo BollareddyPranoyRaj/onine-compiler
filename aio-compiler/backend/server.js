@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import { spawn } from 'child_process';
 import fs from 'fs';
+import prettier from 'prettier';
+import prettierPluginJava from 'prettier-plugin-java';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +20,7 @@ const MAX_STDIN_SIZE = 10_000;
 const MAX_OUTPUT_SIZE = 64 * 1024;
 const COMPILE_TIMEOUT_MS = 8_000;
 const RUN_TIMEOUT_MS = 5_000;
+const FORMAT_TIMEOUT_MS = 5_000;
 const JAVA_HEAP_MB = 128;
 const TEMP_ROOT = path.join(__dirname, 'temp');
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
@@ -40,6 +43,14 @@ const LANGUAGE_CONFIGS = {
       args: (folderPath, code) => [`-J-Xmx${JAVA_HEAP_MB}m`, `${getJavaClassName(code)}.java`],
       timeoutMs: COMPILE_TIMEOUT_MS
     },
+    format: {
+      type: 'prettier',
+      options: {
+        parser: 'java',
+        plugins: [prettierPluginJava],
+        tabWidth: 4
+      }
+    },
     run: {
       command: 'java',
       args: (folderPath, code) => [`-Xmx${JAVA_HEAP_MB}m`, '-cp', folderPath, getJavaClassName(code)],
@@ -49,6 +60,12 @@ const LANGUAGE_CONFIGS = {
   python: {
     getFileName: () => 'main.py',
     fileName: 'main.py',
+    format: {
+      type: 'command',
+      command: 'python3',
+      args: (fileName) => ['-m', 'black', '--quiet', fileName],
+      timeoutMs: FORMAT_TIMEOUT_MS
+    },
     run: {
       command: 'python3',
       args: () => ['main.py'],
@@ -57,6 +74,12 @@ const LANGUAGE_CONFIGS = {
   },
   c: {
     fileName: 'main.c',
+    format: {
+      type: 'command',
+      command: 'clang-format',
+      args: (fileName) => ['-i', fileName],
+      timeoutMs: FORMAT_TIMEOUT_MS
+    },
     compile: {
       command: 'gcc',
       args: () => ['main.c', '-O2', '-o', 'main'],
@@ -70,6 +93,12 @@ const LANGUAGE_CONFIGS = {
   },
   cpp: {
     fileName: 'main.cpp',
+    format: {
+      type: 'command',
+      command: 'clang-format',
+      args: (fileName) => ['-i', fileName],
+      timeoutMs: FORMAT_TIMEOUT_MS
+    },
     compile: {
       command: 'g++',
       args: () => ['main.cpp', '-O2', '-std=c++17', '-o', 'main'],
@@ -83,6 +112,14 @@ const LANGUAGE_CONFIGS = {
   },
   javascript: {
     fileName: 'main.js',
+    format: {
+      type: 'prettier',
+      options: {
+        parser: 'babel',
+        semi: true,
+        singleQuote: true
+      }
+    },
     run: {
       command: 'node',
       args: () => ['main.js'],
@@ -273,6 +310,107 @@ function runCommand(command, args, options = {}) {
     child.stdin.end();
   });
 }
+
+async function formatWithPrettier(code, options) {
+  return prettier.format(code, options);
+}
+
+async function formatWithCommand(code, languageConfig) {
+  const requestId = uuidv4();
+  const folderPath = path.join(TEMP_ROOT, `format-${requestId}`);
+  const fileName = languageConfig.getFileName
+    ? languageConfig.getFileName(code)
+    : languageConfig.fileName;
+  const filePath = path.join(folderPath, fileName);
+
+  try {
+    fs.mkdirSync(folderPath, { recursive: true, mode: 0o700 });
+    fs.writeFileSync(filePath, code, { encoding: 'utf8', mode: 0o600 });
+
+    const formatConfig = languageConfig.format;
+    const formatResult = await runCommand(
+      formatConfig.command,
+      formatConfig.args(fileName),
+      {
+        cwd: folderPath,
+        timeoutMs: formatConfig.timeoutMs
+      }
+    );
+
+    if (!formatResult.ok) {
+      throw new Error(formatResult.stderr || formatResult.stdout || 'Formatter failed.');
+    }
+
+    return fs.readFileSync(filePath, 'utf8');
+  } finally {
+    cleanupDir(folderPath);
+  }
+}
+
+async function formatCode(code, languageConfig) {
+  const formatConfig = languageConfig.format;
+
+  if (!formatConfig) {
+    throw new Error('No formatter is configured for this language.');
+  }
+
+  if (formatConfig.type === 'prettier') {
+    return formatWithPrettier(code, formatConfig.options);
+  }
+
+  if (formatConfig.type === 'command') {
+    return formatWithCommand(code, languageConfig);
+  }
+
+  throw new Error(`Unsupported formatter type: ${formatConfig.type}`);
+}
+
+app.post('/api/format', async (req, res) => {
+  const code = typeof req.body?.code === 'string' ? req.body.code : '';
+  const language = typeof req.body?.language === 'string' ? req.body.language : 'java';
+  const languageConfig = LANGUAGE_CONFIGS[language];
+
+  if (!code.trim()) {
+    return res.status(400).json({
+      message: 'No code provided.',
+      formattedCode: code,
+      didChangeCode: false
+    });
+  }
+
+  if (!languageConfig) {
+    return res.status(400).json({
+      message: `Unsupported language: ${language}`,
+      formattedCode: code,
+      didChangeCode: false
+    });
+  }
+
+  if (Buffer.byteLength(code, 'utf8') > MAX_CODE_SIZE) {
+    return res.status(413).json({
+      message: `Code exceeds ${MAX_CODE_SIZE} bytes limit`,
+      formattedCode: code,
+      didChangeCode: false
+    });
+  }
+
+  try {
+    const formattedCode = await formatCode(code, languageConfig);
+
+    return res.json({
+      message: formattedCode === code ? 'Code is already formatted.' : 'Code formatted successfully.',
+      formattedCode,
+      didChangeCode: formattedCode !== code
+    });
+  } catch (error) {
+    console.error('Format request failed:', error);
+    return res.status(400).json({
+      message: error instanceof Error ? error.message : 'Formatting failed.',
+      formattedCode: code,
+      didChangeCode: false
+    });
+  }
+});
 
 app.post('/api/ai', async (req, res) => {
   const genAI = getGeminiClient();
