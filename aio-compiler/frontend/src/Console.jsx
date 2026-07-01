@@ -1,11 +1,12 @@
 import PropTypes from 'prop-types';
 
-export default function Console({ output, running, aiLoading }) {
+export default function Console({ output, running, aiLoading, formatting }) {
   const isEmpty   = !output;
-  const isLoading = running || aiLoading;
+  const isLoading = running || aiLoading || formatting;
   const isError   = !isLoading && output && (
     output.startsWith('Error') ||
     output.startsWith('AI Error') ||
+    output.startsWith('Format Error') ||
     output.includes('ERROR:')
   );
   const isSuccess = !isLoading && !isError && !isEmpty;
@@ -44,7 +45,8 @@ export default function Console({ output, running, aiLoading }) {
 }
 
 Console.propTypes = {
-  output:    PropTypes.string,
-  running:   PropTypes.bool,
-  aiLoading: PropTypes.bool,
+  output:     PropTypes.string,
+  running:    PropTypes.bool,
+  aiLoading:  PropTypes.bool,
+  formatting: PropTypes.bool,
 };
