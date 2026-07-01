@@ -85,6 +85,7 @@ export default function App() {
   const [code, setCode] = useState(LANGUAGE_OPTIONS[0].starterCode);
   const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
+  const [consoleCleared, setConsoleCleared] = useState(false);
   const [running, setRunning] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [formatting, setFormatting] = useState(false);
@@ -111,6 +112,7 @@ export default function App() {
 
   async function runCode() {
     setRunning(true);
+    setConsoleCleared(false);
     setOutput(`Compiling and running ${getLanguageConfig(selectedLanguage).label}...`);
     try {
       const response = await fetch(buildApiUrl('/api/run'), {
@@ -146,6 +148,7 @@ export default function App() {
 
   async function formatCode() {
     setFormatting(true);
+    setConsoleCleared(false);
     setOutput(`Formatting ${getLanguageConfig(selectedLanguage).label} code...`);
 
     try {
@@ -183,11 +186,13 @@ export default function App() {
     const nextConfig = getLanguageConfig(nextLanguage);
     setSelectedLanguage(nextLanguage);
     setCode(nextConfig.starterCode);
+    setConsoleCleared(false);
     setOutput(`${nextConfig.label} selected. Ready to run.`);
   }
 
   async function handleAiAction() {
     setAiLoading(true);
+    setConsoleCleared(false);
     setOutput(`AI is ${aiAction === 'fix' ? 'fixing' : aiAction === 'explain' ? 'explaining' : 'optimizing'} your ${getLanguageConfig(selectedLanguage).label} code...`);
 
     try {
@@ -294,7 +299,10 @@ export default function App() {
           <button
             id="clear-console-btn"
             className="btn btn-clear"
-            onClick={() => setOutput('')}
+            onClick={() => {
+              setConsoleCleared(true);
+              setOutput('');
+            }}
           >
             ✕ Clear
           </button>
@@ -345,6 +353,7 @@ export default function App() {
               running={running}
               aiLoading={aiLoading}
               formatting={formatting}
+              cleared={consoleCleared}
             />
           </div>
 
