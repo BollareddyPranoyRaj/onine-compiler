@@ -19,7 +19,7 @@ const MAX_CODE_SIZE = 50_000;
 const MAX_STDIN_SIZE = 10_000;
 const MAX_OUTPUT_SIZE = 64 * 1024;
 const COMPILE_TIMEOUT_MS = 15_000;
-const RUN_TIMEOUT_MS = 5_000;
+const RUN_TIMEOUT_MS = 15_000;
 const FORMAT_TIMEOUT_MS = 5_000;
 const JAVA_HEAP_MB = 128;
 const TEMP_ROOT = path.join(__dirname, 'temp');
@@ -607,3 +607,4 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
   server.close(() => process.exit(0));
 });
+  
