@@ -15,16 +15,25 @@ const __dirname = path.dirname(__filename);
 
 const PORT = Number(process.env.PORT || 5000);
 const HOST = process.env.HOST || '127.0.0.1';
-const MAX_CODE_SIZE = 50_000;
-const MAX_STDIN_SIZE = 10_000;
-const MAX_OUTPUT_SIZE = 64 * 1024;
-const COMPILE_TIMEOUT_MS = 15_000;
-const RUN_TIMEOUT_MS = 15_000;
-const FORMAT_TIMEOUT_MS = 5_000;
-const JAVA_HEAP_MB = 128;
+
+// --- RESOURCE SIZES ---
+const MAX_CODE_SIZE = 128 * 1024;    // Toggled to 128 KB (Standard for large solutions/boilerplate)
+const MAX_STDIN_SIZE = 512 * 1024;   // Toggled to 512 KB (Standard competitive programming inputs)
+const MAX_OUTPUT_SIZE = 512 * 1024;  // Toggled to 512 KB (Prevents infinite loop stdout spam but allows large test cases)
+
+// --- TIMEOUTS ---
+const COMPILE_TIMEOUT_MS = 10_000;   // Toggled to 10s (Heavy templates like C++ STL or Bootstrapping Java take time)
+const RUN_TIMEOUT_MS = 5_000;        // Toggled to 5s (Standard max for execution; platform defaults are usually 2s to 5s)
+const FORMAT_TIMEOUT_MS = 3_000;     // Toggled to 3s (Prettier/Black formatters are fast; 5s was overly generous)
+
+// --- MEMORY LIMITS ---
+const JAVA_HEAP_MB = 256;            // Toggled to 256 MB (Modern OpenJDK instances struggle on 128 MB just booting up)
+// *Note: If you run C++/Python, enforce a global container memory limit around 256MB–512MB.
+
+// --- ENVIRONMENT & INFRASTRUCTURE ---
 const TEMP_ROOT = path.join(__dirname, 'temp');
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-const CORS_ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || '')
+const CORS_ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS || ''
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
