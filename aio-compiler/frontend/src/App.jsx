@@ -76,6 +76,113 @@ int main() {
 // Your code here
 
 console.log("Hello, BPR CodeLab!");`
+  },
+  {
+    id: 'typescript',
+    label: 'TypeScript',
+    icon: '🔷',
+    editorLanguage: 'typescript',
+    starterCode: `// Type definition
+interface User {
+    name: string;
+    id: number;
+}
+
+const user: User = {
+    name: "BPR Developer",
+    id: 1
+};
+
+console.log(\`Hello, \${user.name}! (ID: \${user.id})\`);`
+  },
+  {
+    id: 'go',
+    label: 'Go',
+    icon: '🐹',
+    editorLanguage: 'go',
+    starterCode: `package main
+
+import "fmt"
+
+func main() {
+    // Your code here
+    fmt.Println("Hello, Go!")
+}`
+  },
+  {
+    id: 'rust',
+    label: 'Rust',
+    icon: '🦀',
+    editorLanguage: 'rust',
+    starterCode: `fn main() {
+    // Your code here
+    println!("Hello, Rust!");
+}`
+  },
+  {
+    id: 'ruby',
+    label: 'Ruby',
+    icon: '💎',
+    editorLanguage: 'ruby',
+    starterCode: `# Your code here
+puts "Hello, Ruby!"`
+  },
+  {
+    id: 'php',
+    label: 'PHP',
+    icon: '🐘',
+    editorLanguage: 'php',
+    starterCode: `<?php
+// Your code here
+echo "Hello, PHP!\\n";
+?>`
+  },
+  {
+    id: 'swift',
+    label: 'Swift',
+    icon: '🐦',
+    editorLanguage: 'swift',
+    starterCode: `// Your code here
+print("Hello, Swift!")`
+  },
+  {
+    id: 'perl',
+    label: 'Perl',
+    icon: '🐪',
+    editorLanguage: 'perl',
+    starterCode: `#!/usr/bin/perl
+use strict;
+use warnings;
+
+# Your code here
+print "Hello, Perl!\\n";`
+  },
+  {
+    id: 'bash',
+    label: 'Bash',
+    icon: '🐚',
+    editorLanguage: 'shell',
+    starterCode: `#!/bin/bash
+# Your code here
+echo "Hello, Bash!"`
+  },
+  {
+    id: 'lua',
+    label: 'Lua',
+    icon: '🌙',
+    editorLanguage: 'lua',
+    starterCode: `-- Your code here
+print("Hello, Lua!")`
+  },
+  {
+    id: 'kotlin',
+    label: 'Kotlin',
+    icon: '🎯',
+    editorLanguage: 'kotlin',
+    starterCode: `fun main() {
+    // Your code here
+    println("Hello, Kotlin!")
+}`
   }
 ];
 

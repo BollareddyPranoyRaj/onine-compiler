@@ -18,6 +18,8 @@
     "express": "^5.2.1",
     "prettier": "^3.9.4",
     "prettier-plugin-java": "^2.10.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3",
     "uuid": "^13.0.0"
   }
 }

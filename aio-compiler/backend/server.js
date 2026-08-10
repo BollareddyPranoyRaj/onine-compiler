@@ -134,6 +134,121 @@ const LANGUAGE_CONFIGS = {
       args: () => ['main.js'],
       timeoutMs: RUN_TIMEOUT_MS
     }
+  },
+  typescript: {
+    fileName: 'main.ts',
+    format: {
+      type: 'prettier',
+      options: {
+        parser: 'typescript',
+        semi: true,
+        singleQuote: true
+      }
+    },
+    run: {
+      command: 'npx',
+      args: () => ['tsx', 'main.ts'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  go: {
+    fileName: 'main.go',
+    format: {
+      type: 'command',
+      command: 'gofmt',
+      args: (fileName) => ['-w', fileName],
+      timeoutMs: FORMAT_TIMEOUT_MS
+    },
+    run: {
+      command: 'go',
+      args: () => ['run', 'main.go'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  rust: {
+    fileName: 'main.rs',
+    format: {
+      type: 'command',
+      command: 'rustfmt',
+      args: (fileName) => [fileName],
+      timeoutMs: FORMAT_TIMEOUT_MS
+    },
+    compile: {
+      command: 'rustc',
+      args: () => ['main.rs', '-o', 'main'],
+      timeoutMs: COMPILE_TIMEOUT_MS
+    },
+    run: {
+      command: './main',
+      args: () => [],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  ruby: {
+    fileName: 'main.rb',
+    run: {
+      command: 'ruby',
+      args: () => ['main.rb'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  php: {
+    fileName: 'main.php',
+    run: {
+      command: 'php',
+      args: () => ['main.php'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  swift: {
+    fileName: 'main.swift',
+    compile: {
+      command: 'swiftc',
+      args: () => ['main.swift', '-o', 'main'],
+      timeoutMs: COMPILE_TIMEOUT_MS
+    },
+    run: {
+      command: './main',
+      args: () => [],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  perl: {
+    fileName: 'main.pl',
+    run: {
+      command: 'perl',
+      args: () => ['main.pl'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  bash: {
+    fileName: 'main.sh',
+    run: {
+      command: 'bash',
+      args: () => ['main.sh'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  lua: {
+    fileName: 'main.lua',
+    run: {
+      command: 'lua',
+      args: () => ['main.lua'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
+  },
+  kotlin: {
+    fileName: 'main.kt',
+    compile: {
+      command: 'kotlinc',
+      args: () => ['main.kt', '-include-runtime', '-d', 'main.jar'],
+      timeoutMs: COMPILE_TIMEOUT_MS
+    },
+    run: {
+      command: 'java',
+      args: () => ['-jar', 'main.jar'],
+      timeoutMs: RUN_TIMEOUT_MS
+    }
   }
 };
 
